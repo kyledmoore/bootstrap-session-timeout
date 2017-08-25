@@ -61,21 +61,25 @@
                 </div>' : '';
 
             // Create timeout warning dialog
-            $('body').append('<div class="modal fade" id="session-timeout-dialog"> \
-              <div class="modal-dialog"> \
+            $('body').append('<div tabindex="-1" class="modal fade" id="session-timeout-dialog"> \
+              <div class="modal-dialog" role="alertdialog" aria-label="' + opt.title + '" aria-describedby="sessionTimerDesc"> \
                 <div class="modal-content"> \
                   <div class="modal-header"> \
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button> \
-                    <h4 class="modal-title">' + opt.title + '</h4> \
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color:black"><span aria-hidden="true">&times;</span></button> \
+                    <h1 class="modal-title">' + opt.title + '</h1> \
                   </div> \
-                  <div class="modal-body"> \
-                    <p>' + opt.message + '</p> \
+                  <div class="modal-body" role="document"> \
+                    <p id="sessionTimerDesc">' + opt.message.replace('{timer}', getSmartCountdownText(getDialogTimerSecondsLeft())) + '</p> \
                     ' + countdownMessage + ' \
                     ' + coundownBarHtml + ' \
                   </div> \
                   <div class="modal-footer"> \
-                    <button id="session-timeout-dialog-logout" type="button" class="btn btn-default">' + opt.logoutButton + '</button> \
+                  <div class="row"> \
+                  <div class="col-xs-6">\
                     <button id="session-timeout-dialog-keepalive" type="button" class="btn btn-primary" data-dismiss="modal">' + opt.keepAliveButton + '</button> \
+                  </div>\
+                  <div class="col-xs-6">\
+                    <button id="session-timeout-dialog-logout" type="button" class="btn btn-primary">' + opt.logoutButton + '</button> \
                   </div> \
                 </div> \
               </div> \
@@ -160,7 +164,7 @@
             timer = setTimeout(function() {
                 // Check for onWarn callback function and if there is none, launch dialog
                 if (typeof opt.onWarn !== 'function') {
-                    $('#session-timeout-dialog').modal('show');
+                    $('#session-timeout-dialog').modal({show: true, backdrop: 'static'});
                 } else {
                     opt.onWarn(opt);
                 }
@@ -188,13 +192,28 @@
             }, (opt.redirAfter - opt.warnAfter));
         }
 
+        function getSmartCountdownText(secondsLeft) {
+            var minLeft   = Math.floor(secondsLeft / 60);
+            var secRemain = secondsLeft % 60;
+            var countTxt  = minLeft > 0 ? minLeft + 'm' : '';
+            if (countTxt.length > 0) {
+                countTxt += ' ';
+            }
+            countTxt += secRemain + 's';
+            return countTxt;
+        }
+
+        function getDialogTimerSecondsLeft() {
+            return Math.floor((opt.redirAfter - opt.warnAfter) / 1000);
+        }
+
         function startCountdownTimer(type, reset) {
             // Clear countdown timer
             clearTimeout(countdown.timer);
 
             if (type === 'dialog' && reset) {
                 // If triggered by startDialogTimer start warning countdown
-                countdown.timeLeft = Math.floor((opt.redirAfter - opt.warnAfter) / 1000);
+                countdown.timeLeft = getDialogTimerSecondsLeft();
             } else if (type === 'session' && reset) {
                 // If triggered by startSessionTimer start full countdown
                 // (this is needed if user doesn't close the warning dialog)
@@ -210,13 +229,7 @@
             var countdownEl = $('.countdown-holder');
             var secondsLeft = countdown.timeLeft >= 0 ? countdown.timeLeft : 0;
             if (opt.countdownSmart) {
-                var minLeft = Math.floor(secondsLeft / 60);
-                var secRemain = secondsLeft % 60;
-                var countTxt = minLeft > 0 ? minLeft + 'm' : '';
-                if (countTxt.length > 0) {
-                    countTxt += ' ';
-                }
-                countTxt += secRemain + 's';
+                var countTxt = getSmartCountdownText(secondsLeft);
                 countdownEl.text(countTxt);
             } else {
                 countdownEl.text(secondsLeft + "s");
