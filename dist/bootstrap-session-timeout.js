@@ -30,7 +30,11 @@
             onRedir: false,
             countdownMessage: false,
             countdownBar: false,
-            countdownSmart: false
+            countdownSmart: false,
+            modalOptions: {
+                backdrop: true, //the default bootstrap backdrop (clickable to exit)
+                show: true //you're not gonna wanna change this
+            }
         };
 
         var opt = defaults,
@@ -39,7 +43,7 @@
 
         // Extend user-set options over defaults
         if (options) {
-            opt = $.extend(defaults, options);
+            opt = $.extend(true, defaults, options);
         }
 
         // Some error handling if options are miss-configured
@@ -164,7 +168,7 @@
             timer = setTimeout(function() {
                 // Check for onWarn callback function and if there is none, launch dialog
                 if (typeof opt.onWarn !== 'function') {
-                    $('#session-timeout-dialog').modal({show: true, backdrop: 'static'});
+                    $('#session-timeout-dialog').modal(opt.modalOptions);
                 } else {
                     opt.onWarn(opt);
                 }

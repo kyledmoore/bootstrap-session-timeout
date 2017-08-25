@@ -188,6 +188,13 @@ Default: `false`
 
 Custom callback you can use instead of redirecting the user to `redirUrl`. Takes options object as the only argument.
 
+**modalOptions**
+Type: `Object`
+
+Default: Bootstrap defaults
+
+See [Bootstrap Modal Options](https://getbootstrap.com/docs/3.3/javascript/#modals-options).  Do not modify show parameter.
+
 ## Examples
 
 You can play around with the examples in the `/examples` directory.
